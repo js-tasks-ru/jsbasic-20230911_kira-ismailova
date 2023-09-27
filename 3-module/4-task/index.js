@@ -1,3 +1,4 @@
+
 function showSalary(data, age) {
   return data
     .filter(item => item.age <= age)
