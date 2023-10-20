@@ -6,11 +6,24 @@ export default class Carousel {
     this.currentSlideIndex = 0;
     this.elem = this.createCarouselElement();
     this.addButtonClickListeners();
+    this.toggleArrowVisibility();
   }
 
   createCarouselElement() {
     const elem = createElement('<div class="carousel"></div>');
     const elemInner = createElement('<div class="carousel__inner"></div>');
+
+    const prevButton = createElement(`
+      <div class="carousel__arrow carousel__arrow_left">
+        <img src="/assets/images/icons/angle-left-icon.svg" alt="icon">
+      </div>
+    `);
+
+    const nextButton = createElement(`
+      <div class="carousel__arrow carousel__arrow_right">
+        <img src="/assets/images/icons/angle-icon.svg" alt="icon">
+      </div>
+    `);
 
     this.slides.forEach((slide) => {
       const slideElement = createElement(`
@@ -29,6 +42,8 @@ export default class Carousel {
       elemInner.appendChild(slideElement);
     });
 
+    elemInner.appendChild(prevButton);
+    elemInner.appendChild(nextButton);
     elem.appendChild(elemInner);
 
     return elem;
@@ -46,14 +61,16 @@ export default class Carousel {
       this.slideToNext();
     });
 
-    const addButton = this.elem.querySelector('.carousel__button');
-    addButton.addEventListener('click', (event) => {
-      const currentSlide = this.slides[this.currentSlideIndex];
-      const customEvent = new CustomEvent('product-add', {
-        detail: currentSlide.id,
-        bubbles: true
+    const addButtonList = this.elem.querySelectorAll('.carousel__button');
+    addButtonList.forEach((addButton) => {
+      addButton.addEventListener('click', (event) => {
+        const currentSlide = this.slides[this.currentSlideIndex];
+        const customEvent = new CustomEvent('product-add', {
+          detail: currentSlide.id,
+          bubbles: true
+        });
+        this.elem.dispatchEvent(customEvent);
       });
-      this.elem.dispatchEvent(customEvent);
     });
   }
 
@@ -61,6 +78,7 @@ export default class Carousel {
     if (this.currentSlideIndex > 0) {
       this.currentSlideIndex--;
       this.slideCarousel();
+      this.toggleArrowVisibility();
     }
   }
 
@@ -68,16 +86,17 @@ export default class Carousel {
     if (this.currentSlideIndex < this.slides.length - 1) {
       this.currentSlideIndex++;
       this.slideCarousel();
+      this.toggleArrowVisibility();
     }
   }
 
   slideCarousel() {
     const elemInner = this.elem.querySelector('.carousel__inner');
-    elemInner.style.transform = `translateX(${-this.currentSlideIndex * 100}%)`;
-    this.toggleArrowsVisibility();
+    const slideWidth = this.elem.querySelector('.carousel__slide').offsetWidth;
+    elemInner.style.transform = `translateX(${-this.currentSlideIndex * slideWidth}px)`;
   }
 
-  toggleArrowsVisibility() {
+  toggleArrowVisibility() {
     const prevButton = this.elem.querySelector('.carousel__arrow_left');
     const nextButton = this.elem.querySelector('.carousel__arrow_right');
 
